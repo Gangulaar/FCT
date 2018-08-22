@@ -3,16 +3,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.Set;
 
 import com.portware.FIXCertification.FIXFetcher;
-import com.portware.FIXCertification.FetchAll;
 import com.portware.FIXCertification.XMLWriterDOM;
 import com.portware.FIXCertification.FileHandler;
 import com.portware.FIXCertification.XMLParser;
+import com.portware.FIXCertification.ConstructInbound;
 import com.portware.FIXCertification.FIX;;
 public class FIXCertificationAnalyzer 
 {
@@ -24,6 +22,7 @@ public class FIXCertificationAnalyzer
 	{
 		FileHandler fh = new FileHandler();
 		ArrayList <String> files=fh.getPWDFiles(pwd);					 // get the present directory files
+		
 		ArrayList<String> nameList_quote = new ArrayList<String>();   	// list for Quotes
 		ArrayList<String> nameList_trade = new ArrayList<String>();   	//list for Trades
 		if( !files.isEmpty() && files != null)							//if files are present
@@ -45,7 +44,7 @@ public class FIXCertificationAnalyzer
 			else if(nameList_trade.size() == 0 || nameList_quote.size() == 0) //If there are file present but there are not valid 
 			{
 				System.out.println("Can't recognize a valid log, Please enter the folowing details:");
-			setCustomEntries();
+				setCustomEntries();
 			}
 			else //There is only 1 trade and 1 Quote
 			{
@@ -77,7 +76,6 @@ public class FIXCertificationAnalyzer
 		} 
 		catch (IOException e1) 
 		{
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		fix.setDelimiter(firstLine.get());
@@ -94,15 +92,9 @@ public class FIXCertificationAnalyzer
 				Files.createFile(Paths.get(Output));
 			}
 			System.out.println("Started Analyzing");
-			Set<String> tags = new HashSet<>();
-			tags.add("35=8");
-			tags.add("40=D");
-			tags.add("37=");
-			//ArrayList<String> trans = f.getExecutionReport();
-			FetchAll f1=new FetchAll("C:\\Users\\agangula\\Desktop\\BOA Latest\\v 1.0\\BOAFXTRADES_20170919.log","C:\\Users\\agangula\\Desktop\\BOA Latest\\v 1.0\\BOAFXQUOTES_20170919.log" , "C:\\Users\\agangula\\Desktop\\BOA Latest\\v 1.0\\cache.xml"  );
-			f1.getRequest();
+			ArrayList<String> trans = f.getExecutionReport();
 			System.out.println("Done Analyzing");
-		/*	if(trans.isEmpty() || trans.get(0) == null)
+			if(trans.isEmpty() || trans.get(0) == null)
 			{
 				System.out.println("No transactions to write");
 			}
@@ -110,15 +102,19 @@ public class FIXCertificationAnalyzer
 			{
 				System.out.println("Writing to cache...");
 				XMLWriterDOM smlwd = new XMLWriterDOM();
-				smlwd.writeToXML(trans, Output);
-			}*/
+				smlwd.writeToXML();
+				smlwd.addChildNodes(trans);
+				smlwd.writeToFile(Output);
+			}
 		} 
-		catch (Exception e) 
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		//XMLParser xmlp =new XMLParser(TradesFile, QuotesFile, Output);
-		//xmlp.initalized();
+		XMLParser xmlp =new XMLParser(TradesFile, QuotesFile, Output);
+		xmlp.initalized();
+		ConstructInbound ci = new ConstructInbound();
+		ci.buildInbound();
 	}
 	public static void setCustomEntries()
 	{

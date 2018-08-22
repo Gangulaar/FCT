@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
 
 
 
@@ -30,8 +29,8 @@ public class FIXFetcher
 		{
 			 Files.lines(Paths.get(FIXFetcher.TradesFile)).parallel()
 					.filter(msg -> msg.contains(FIX.FIXDELIMITER+ "35=8"))
-					//.filter(msg -> msg.contains(FIX.FIXDELIMITER+ "40=D"))
-					.filter(msg -> msg.contains(FIX.FIXDELIMITER+"37="))				
+					.filter(msg -> msg.contains(FIX.FIXDELIMITER+ "40=D"))
+					.filter(msg -> msg.contains(FIX.FIXDELIMITER+"37="))
 					.forEach(exec -> getAssociateTrades(exec));
 				return transaction;
 		} 
@@ -41,6 +40,7 @@ public class FIXFetcher
 			e.printStackTrace();
 		}
 		return null;
+
 	}
 	public boolean getAssociateTrades(String exec)
 	{
@@ -50,7 +50,7 @@ public class FIXFetcher
 			Optional<String> optionalTrade = Files.lines(Paths.get(FIXFetcher.TradesFile)).parallel()
 					.filter(msg -> msg.contains(FIX.FIXDELIMITER+ "35=D"))
 					.filter(msg -> msg.contains(FIX.FIXDELIMITER + "11="+getFIXValue(exec,"11")))
-					.filter(msg -> msg.contains(FIX.FIXDELIMITER+ "117="+getFIXValue(exec,"37")))
+					//.filter(msg -> msg.contains(FIX.FIXDELIMITER+ "117="+getFIXValue(exec,"37")))
 					.findFirst();
 			if(optionalTrade.isPresent()) 
 			{
@@ -123,6 +123,7 @@ public class FIXFetcher
 				transaction.add(Request);
 				return true;
 			}
+			
 		}
 		catch (IOException e) 
 		{
@@ -136,4 +137,5 @@ public class FIXFetcher
 		System.out.println(msg);
 		return msg;
 	}
+
 }

@@ -16,55 +16,90 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-
 public class XMLWriterDOM 
 {
-    public void writeToXML(ArrayList<String> listOfTransactions,String Output)
+	Document doc;
+	Element rootElement;
+	int id=0;
+	public void writeToXML()
+	{
+		createRootElement();
+	}
+    public void createRootElement()
     {
     	 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
          DocumentBuilder dBuilder;
          try 
          {
              dBuilder = dbFactory.newDocumentBuilder();
-             Document doc = dBuilder.newDocument();
-             Element rootElement = doc.createElement("Transactions");
+             doc = dBuilder.newDocument();
+             rootElement = doc.createElement("Transactions");
              doc.appendChild(rootElement);
-             for(int i =0 ,count =0;i < listOfTransactions.size();i=i+4,count++)
-             	rootElement.appendChild(getEmployee(doc, count+1+"", listOfTransactions.get(i), listOfTransactions.get(i+1), listOfTransactions.get(i+2), listOfTransactions.get(i+3)));
-             TransformerFactory transformerFactory = TransformerFactory.newInstance();
-             Transformer transformer = transformerFactory.newTransformer();
-             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-             DOMSource source = new DOMSource(doc);
-             StreamResult file = new StreamResult(new File(Output));
-             transformer.transform(source, file);
-             System.out.println("DONE");
+             
          } 
          catch (Exception e) 
          {
              e.printStackTrace();
          }
     }
-
-    private static Node getEmployee(Document doc, String id, String QuoteRequest, String QuoteResponse, String Order, String Execution) 
+    public void addChildNodes(ArrayList<String> listOfTransactions)
+    {
+    	for(int i =0 ,count =0;i < listOfTransactions.size();i=i+4,count++)
+         	rootElement.appendChild(getTransaction(doc, count+1+"", listOfTransactions.get(i), listOfTransactions.get(i+1), listOfTransactions.get(i+2), listOfTransactions.get(i+3)));
+    	
+    }
+    public void addAllTrans(ArrayList<String> listOfTransactions)
+    {
+    	/*for(String trans: listOfTransactions)
+    	{
+    		System.out.println(trans);
+    	}*/
+    	rootElement.appendChild(getTransaction(doc, (++id)+"", listOfTransactions.get(0), listOfTransactions.get(1), listOfTransactions.get(2), listOfTransactions.get(3), listOfTransactions.get(4)));
+    	
+    }
+    public void writeToFile(String Output)
+    {
+    	try
+    	{
+    		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source = new DOMSource(doc);
+            StreamResult file = new StreamResult(new File(Output));
+            transformer.transform(source, file);
+            System.out.println("DONE");
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    }
+    private static Node getTransaction(Document doc, String... allId)
     {
         Element transaction = doc.createElement("Transaction");
 
-        transaction.setAttribute("id", id);
+        transaction.setAttribute("id", allId[0]);
 
-        transaction.appendChild(getEmployeeElements(doc, transaction, "QuoteRequest", QuoteRequest));
+        transaction.appendChild(getTransactionElements(doc, transaction, "QuoteRequest", allId[1]));
 
-        transaction.appendChild(getEmployeeElements(doc, transaction, "QuoteResponse", QuoteResponse));
+        transaction.appendChild(getTransactionElements(doc, transaction, "QuoteResponse", allId[2]));
 
-        transaction.appendChild(getEmployeeElements(doc, transaction, "Order", Order));
+        transaction.appendChild(getTransactionElements(doc, transaction, "Order", allId[3]));
 
-        transaction.appendChild(getEmployeeElements(doc, transaction, "Execution", Execution));
+        transaction.appendChild(getTransactionElements(doc, transaction, "Execution", allId[4]));
+        
+        if(allId.length > 5)
+        {
+        	transaction.appendChild(getTransactionElements(doc, transaction, "Inboundorder", allId[5]));
+        }
+        	
 
         return transaction;
     }
 
 
     //utility method to create text node
-    private static Node getEmployeeElements(Document doc, Element element, String tag, String value) 
+    private static Node getTransactionElements(Document doc, Element element, String tag, String value) 
     {
         Element node = doc.createElement(tag);
         node.appendChild(doc.createTextNode(value));
