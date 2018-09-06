@@ -48,4 +48,10 @@ public class FIXHandler
 		msg= msg.substring(index+1,msg.length()-2);
 		return msg;
 	}
+	public String quickSearch(String transaction,String key)
+	{
+		key = FIX.FIXDELIMITER+key;
+		transaction =transaction.substring(transaction.indexOf(key)+key.length()+1);
+		return transaction.substring(0, transaction.indexOf(FIX.FIXDELIMITER));
+	}
 }
